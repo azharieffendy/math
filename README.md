@@ -182,15 +182,27 @@ Each correct answer adds bonus time to the countdown timer, allowing players to 
 - **Addition**: `num1 + num2` with results up to 200
 - **Subtraction**: `num1 - num2` where num1 ≥ num2 (no negatives)
 - **Wrong Answers**: 
-  - **Smart Generation**: At least 2 wrong answers have the same last digit as correct answer
-  - **Digit Count Matching**: All wrong answers have same number of digits as correct answer
-  - Example 1: If answer is 22 (2-digit), wrong answers: 12, 32, 52 (all 2-digit, ending in 2)
-  - Example 2: If answer is 7 (1-digit), wrong answers: 3, 5, 9 (all 1-digit)
-  - Example 3: If answer is 145 (3-digit), wrong answers: 125, 135, 155 (all 3-digit)
-  - Prevents students from guessing based on:
-    - Ones place digit alone
-    - Number of digits (can't eliminate 8 vs 18 vs 118)
-  - Remaining wrong answer uses random offset (1-20)
+  - **Smart Generation Strategy**:
+    - 2 wrong answers with same **LAST digit** as correct answer
+    - 1 wrong answer with same **FIRST digit** as correct answer
+    - All wrong answers have same **number of digits** as correct answer
+  - **Example 1**: Answer is 22 (2-digit)
+    - Wrong answer 1: 12 (ends in 2 ✓)
+    - Wrong answer 2: 32 (ends in 2 ✓)
+    - Wrong answer 3: 28 (starts with 2 ✓)
+  - **Example 2**: Answer is 67 (2-digit)
+    - Wrong answer 1: 47 (ends in 7 ✓)
+    - Wrong answer 2: 87 (ends in 7 ✓)
+    - Wrong answer 3: 62 (starts with 6 ✓)
+  - **Example 3**: Answer is 145 (3-digit)
+    - Wrong answer 1: 125 (ends in 5 ✓)
+    - Wrong answer 2: 135 (ends in 5 ✓)
+    - Wrong answer 3: 148 (starts with 1 ✓)
+  - **Prevents guessing based on**:
+    - Ones place digit (multiple answers end the same)
+    - Tens place digit (multiple answers start the same)
+    - Number of digits (all have same digit count)
+  - **Forces true calculation** - no shortcuts work!
 - **Shuffling**: Answers randomly positioned each time
 
 ## 💾 High Score System & Statistics

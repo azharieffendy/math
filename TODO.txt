@@ -19,13 +19,14 @@ RECENT UPDATES (2025-11-15)
   - Low volume (8%) for non-intrusive background ambiance
   - Smooth 2-second chord changes for calming effect
   - Automatically stops when game ends or settings changed
-✓ Smart answer generation (prevents guessing tricks):
-  - At least 2 wrong answers share the same last digit as correct answer
+✓ Smart answer generation (prevents ALL guessing tricks):
+  - 2 wrong answers share the same LAST digit as correct answer
+  - 1 wrong answer shares the same FIRST digit as correct answer
   - All wrong answers have the same number of digits as correct answer
-  - Example: If answer is 22 (2-digit), wrong answers: 12, 32, 52 (all 2-digit)
-  - Prevents guessing from ones place digit OR digit count
-  - Forces students to calculate rather than use elimination tricks
-  - Makes the game more educationally valuable
+  - Example: If answer is 22, wrong answers: 12 (ends in 2), 32 (ends in 2), 28 (starts with 2)
+  - Prevents guessing from ones place, tens place, OR digit count
+  - No shortcuts work - students MUST calculate the full answer
+  - Makes the game significantly more challenging and educationally valuable
 ✓ Final score screen with comprehensive breakdown:
   - Shows accuracy percentage, average speed, best streak
   - Displays correct/wrong answers and total questions

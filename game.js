@@ -308,17 +308,22 @@ const Game = (() => {
       return Math.floor(Math.log10(Math.abs(num))) + 1;
     };
     
+    // Helper function to get first digit
+    const getFirstDigit = (num) => {
+      return Math.floor(num / Math.pow(10, getDigitCount(num) - 1));
+    };
+    
     // Helper function to check if number has same digit count as answer
     const correctDigitCount = getDigitCount(q.ans);
     const hasSameDigitCount = (num) => getDigitCount(num) === correctDigitCount;
+    const correctFirstDigit = getFirstDigit(q.ans);
     
-    // Generate at least 2 wrong answers with the same last digit as correct answer
-    let sameDigitCount = 0;
     const maxAttempts = 50; // Prevent infinite loops
-    let attempts = 0;
     
-    // First, generate 2 wrong answers with matching last digit AND same digit count
-    while(sameDigitCount < 2 && attempts < maxAttempts){
+    // Step 1: Generate 2 wrong answers with matching LAST digit (and same digit count)
+    let sameLastDigitCount = 0;
+    let attempts = 0;
+    while(sameLastDigitCount < 2 && attempts < maxAttempts){
       attempts++;
       // Add/subtract multiples of 10 to keep same last digit
       const multiplier = rand(1, 10); // 1-10 means ±10, ±20, ... ±100
@@ -329,11 +334,46 @@ const Game = (() => {
       if(candidate >= 0 && candidate <= 200 && candidate !== q.ans && 
          !answers.has(candidate) && hasSameDigitCount(candidate)){
         answers.add(candidate);
-        sameDigitCount++;
+        sameLastDigitCount++;
       }
     }
     
-    // Generate remaining wrong answers (can have any last digit, but must have same digit count)
+    // Step 2: Generate 1 wrong answer with matching FIRST digit (and same digit count)
+    attempts = 0;
+    let sameFirstDigitCount = 0;
+    while(sameFirstDigitCount < 1 && attempts < maxAttempts){
+      attempts++;
+      // Change only the last digit(s) to keep first digit same
+      const currentLastDigit = q.ans % 10;
+      const newLastDigit = rand(0, 9);
+      
+      // For 2-digit numbers: change the ones place
+      // For 3-digit numbers: change more digits
+      let candidate;
+      if(correctDigitCount === 1){
+        // For 1-digit, we can't match first digit without being the same number
+        // So generate any different 1-digit number
+        candidate = rand(0, 9);
+      } else if(correctDigitCount === 2){
+        // For 2-digit: keep first digit, change last digit
+        const tensPlace = Math.floor(q.ans / 10);
+        candidate = tensPlace * 10 + newLastDigit;
+      } else {
+        // For 3-digit: keep first digit, change others
+        const firstDigitValue = Math.floor(q.ans / 100);
+        const remainingDigits = rand(0, 99);
+        candidate = firstDigitValue * 100 + remainingDigits;
+      }
+      
+      // Make sure it's valid and different
+      if(candidate >= 0 && candidate <= 200 && candidate !== q.ans && 
+         !answers.has(candidate) && hasSameDigitCount(candidate)){
+        answers.add(candidate);
+        sameFirstDigitCount++;
+      }
+    }
+    
+    // Step 3: Generate 1 remaining wrong answer (any digit pattern, but same digit count)
     attempts = 0;
     const maxOffset = state.difficulty === 'easy' ? 5 : 20;
     while(answers.size < 4 && attempts < maxAttempts){
