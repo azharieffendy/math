@@ -13,6 +13,19 @@ RECENT UPDATES (2025-11-15)
 ✓ Added smooth mascot animations (bounce, shake, spin)
 ✓ Implemented particle effects (stars, sparkles) on correct answers
 ✓ Active theme highlighting with gradient background and pulsing animation
+✓ Background music system:
+  - Pleasant chord progression (C-G-Am-F) using Web Audio API
+  - Toggle button with on/off states
+  - Low volume (8%) for non-intrusive background ambiance
+  - Smooth 2-second chord changes for calming effect
+  - Automatically stops when game ends or settings changed
+✓ Smart answer generation (prevents guessing tricks):
+  - At least 2 wrong answers share the same last digit as correct answer
+  - All wrong answers have the same number of digits as correct answer
+  - Example: If answer is 22 (2-digit), wrong answers: 12, 32, 52 (all 2-digit)
+  - Prevents guessing from ones place digit OR digit count
+  - Forces students to calculate rather than use elimination tricks
+  - Makes the game more educationally valuable
 ✓ Final score screen with comprehensive breakdown:
   - Shows accuracy percentage, average speed, best streak
   - Displays correct/wrong answers and total questions
@@ -43,7 +56,7 @@ UI/UX IMPROVEMENTS
 GAMEPLAY FEATURES
 -----------------
 [ ] Add multiplication and division operations
-[ ] Add sound toggle button (currently only has answer sounds)
+[✓] Add sound toggle button (currently only has answer sounds)
 [ ] Save game progress/session statistics
 [ ] Add pause button during gameplay
 [ ] Add "Resume" option after pausing

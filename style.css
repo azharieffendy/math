@@ -41,6 +41,7 @@ h1{margin:0;font-size:1.8rem;color:var(--accent);font-weight:900;text-shadow:2px
   .btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
 }
 .ghost{background:rgba(255,255,255,0.9);color:var(--accent);border:2px solid var(--accent);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.ghost[aria-pressed="true"]{background:var(--accent);color:white;border-color:var(--accent)}
 
 .top-row{display:grid;grid-template-columns:auto 1fr auto;gap:18px;margin-top:14px}
 .panel{background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,1));padding:18px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:3px solid rgba(255,255,255,0.8)}

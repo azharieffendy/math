@@ -17,8 +17,8 @@ const Game = (() => {
   const refs = {
     question: $('#question'), answers: $('#answers'), feedback: $('#feedback'),
     score: $('#score'), wrong: $('#wrong'), time: $('#time'), qnum: $('#qnum'),
-    startBtn: $('#startBtn'), learningToggle: $('#learningToggle'), mascot: $('#mascotSvg'),
-    rewardPopup: $('#rewardPopup'), questionCard: document.querySelector('.question-card'),
+    startBtn: $('#startBtn'), learningToggle: $('#learningToggle'), musicToggle: $('#musicToggle'),
+    mascot: $('#mascotSvg'), rewardPopup: $('#rewardPopup'), questionCard: document.querySelector('.question-card'),
     // Score screen refs
     scoreScreen: $('#scoreScreen'), scoreEmoji: $('#scoreEmoji'), scoreTitle: $('#scoreTitle'),
     scoreSubtitle: $('#scoreSubtitle'), finalScore: $('#finalScore'), highScoreBadge: $('#highScoreBadge'),
@@ -35,22 +35,117 @@ const Game = (() => {
   // Audio system - single AudioContext reused (avoids creating many contexts)
   class AudioSystem {
     constructor(){
-      this.ctx = null; this.bgGain=null; this.bgOsc=null; this.bgPlaying=false;
+      this.ctx = null; 
+      this.bgGain = null; 
+      this.bgOscillators = []; 
+      this.bgPlaying = false;
+      this.musicEnabled = false;
     }
-    init(){ if(this.ctx) return; this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }
+    
+    init(){ 
+      if(this.ctx) return; 
+      this.ctx = new (window.AudioContext||window.webkitAudioContext)(); 
+    }
+    
     playSfx(type){
       try{
         this.init();
-        const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+        const o = this.ctx.createOscillator(); 
+        const g = this.ctx.createGain();
         o.type = type==='correct' ? 'triangle' : 'square';
         o.frequency.value = type==='correct' ? 880 : 220;
-        g.gain.value = 0.001; g.connect(this.ctx.destination);
+        g.gain.value = 0.001; 
+        g.connect(this.ctx.destination);
         o.connect(g);
         const now = this.ctx.currentTime;
         g.gain.exponentialRampToValueAtTime(0.15, now+0.01);
         g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
-        o.start(now); o.stop(now+0.45);
+        o.start(now); 
+        o.stop(now+0.45);
       }catch(e){/* audio blocked */}
+    }
+    
+    startMusic(){
+      if(this.bgPlaying || !this.musicEnabled) return;
+      
+      try{
+        this.init();
+        
+        // Create gain node for background music
+        this.bgGain = this.ctx.createGain();
+        this.bgGain.gain.value = 0.08; // Low volume for background
+        this.bgGain.connect(this.ctx.destination);
+        
+        // Simple pleasant chord progression: C major, G major, A minor, F major
+        const progression = [
+          [261.63, 329.63, 392.00], // C major (C-E-G)
+          [392.00, 493.88, 587.33], // G major (G-B-D)
+          [440.00, 523.25, 659.25], // A minor (A-C-E)
+          [349.23, 440.00, 523.25]  // F major (F-A-C)
+        ];
+        
+        let chordIndex = 0;
+        const playChord = () => {
+          if(!this.bgPlaying) return;
+          
+          // Stop previous oscillators
+          this.bgOscillators.forEach(osc => {
+            try{ osc.stop(); }catch(e){}
+          });
+          this.bgOscillators = [];
+          
+          // Play current chord
+          const chord = progression[chordIndex];
+          chord.forEach(freq => {
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            osc.connect(this.bgGain);
+            osc.start();
+            this.bgOscillators.push(osc);
+          });
+          
+          // Move to next chord
+          chordIndex = (chordIndex + 1) % progression.length;
+          
+          // Schedule next chord change (every 2 seconds for slow, calming pace)
+          setTimeout(playChord, 2000);
+        };
+        
+        this.bgPlaying = true;
+        playChord();
+      }catch(e){
+        console.log('Music not available:', e);
+      }
+    }
+    
+    stopMusic(){
+      if(!this.bgPlaying) return;
+      
+      this.bgPlaying = false;
+      this.bgOscillators.forEach(osc => {
+        try{ 
+          osc.stop(); 
+        }catch(e){}
+      });
+      this.bgOscillators = [];
+      
+      if(this.bgGain){
+        this.bgGain.disconnect();
+        this.bgGain = null;
+      }
+    }
+    
+    toggleMusic(){
+      this.musicEnabled = !this.musicEnabled;
+      
+      if(this.musicEnabled){
+        this.startMusic();
+      } else {
+        this.stopMusic();
+      }
+      
+      return this.musicEnabled;
     }
   }
 
@@ -205,12 +300,51 @@ const Game = (() => {
 
     // create options
     const answers = new Set([q.ans]);
-    const maxOffset = state.difficulty==='easy'?5:20;
-    while(answers.size<4){
-      const offset = rand(1,maxOffset);
-      const candidate = Math.random()>0.5? q.ans+offset : Math.max(0,q.ans-offset);
-      if(candidate>=0 && candidate<= 200) answers.add(candidate);
+    const correctLastDigit = q.ans % 10;
+    
+    // Helper function to get digit count
+    const getDigitCount = (num) => {
+      if(num === 0) return 1;
+      return Math.floor(Math.log10(Math.abs(num))) + 1;
+    };
+    
+    // Helper function to check if number has same digit count as answer
+    const correctDigitCount = getDigitCount(q.ans);
+    const hasSameDigitCount = (num) => getDigitCount(num) === correctDigitCount;
+    
+    // Generate at least 2 wrong answers with the same last digit as correct answer
+    let sameDigitCount = 0;
+    const maxAttempts = 50; // Prevent infinite loops
+    let attempts = 0;
+    
+    // First, generate 2 wrong answers with matching last digit AND same digit count
+    while(sameDigitCount < 2 && attempts < maxAttempts){
+      attempts++;
+      // Add/subtract multiples of 10 to keep same last digit
+      const multiplier = rand(1, 10); // 1-10 means ±10, ±20, ... ±100
+      const offset = multiplier * 10;
+      const candidate = Math.random() > 0.5 ? q.ans + offset : q.ans - offset;
+      
+      // Make sure it's valid, different from correct answer, and has same digit count
+      if(candidate >= 0 && candidate <= 200 && candidate !== q.ans && 
+         !answers.has(candidate) && hasSameDigitCount(candidate)){
+        answers.add(candidate);
+        sameDigitCount++;
+      }
     }
+    
+    // Generate remaining wrong answers (can have any last digit, but must have same digit count)
+    attempts = 0;
+    const maxOffset = state.difficulty === 'easy' ? 5 : 20;
+    while(answers.size < 4 && attempts < maxAttempts){
+      attempts++;
+      const offset = rand(1, maxOffset);
+      const candidate = Math.random() > 0.5 ? q.ans + offset : Math.max(0, q.ans - offset);
+      if(candidate >= 0 && candidate <= 200 && !answers.has(candidate) && hasSameDigitCount(candidate)){
+        answers.add(candidate);
+      }
+    }
+    
     const arr = shuffle(Array.from(answers));
     
     // Reuse existing buttons - just update text and handler
@@ -415,6 +549,13 @@ const Game = (() => {
   // Hide score screen
   function hideScoreScreen(){
     refs.scoreScreen.classList.remove('show');
+    // Stop music when going back to settings
+    if(audio.bgPlaying){
+      audio.stopMusic();
+      audio.musicEnabled = false;
+      refs.musicToggle.setAttribute('aria-pressed', 'false');
+      refs.musicToggle.textContent = '🎵 Music';
+    }
   }
 
   function startGame(){
@@ -588,6 +729,13 @@ const Game = (() => {
     // Start button
     refs.startBtn.addEventListener('click', startGame);
 
+    // Music toggle
+    refs.musicToggle.addEventListener('click', () => {
+      const isEnabled = audio.toggleMusic();
+      refs.musicToggle.setAttribute('aria-pressed', isEnabled);
+      refs.musicToggle.textContent = isEnabled ? '🎵 Music: On' : '🎵 Music';
+    });
+    
     // Learning mode toggle
     refs.learningToggle.addEventListener('click', () => {
       state.learningMode = !state.learningMode;
