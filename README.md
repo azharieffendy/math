@@ -2,6 +2,17 @@
 
 A complete web-based math learning game designed for Grade 1 students, focusing on simple addition and subtraction with numbers 0-100. Game ends after 5 wrong answers or when time runs out!
 
+## 🆕 Recent Updates
+
+**Latest Enhancements:**
+- ⏱️ **Visual Timer Progress Bar** - Animated bar shows time remaining at a glance, turns red when low!
+- ⏸️ **Pause/Resume System** - Pause anytime with button or `P` key, choose to resume or change settings
+- 🔊 **Enhanced Sound Effects** - Pleasant ding for correct, gentle buzz for wrong, celebration chord for streaks
+- 🔊 **Sound Toggle** - Enable/disable sound effects independently with button or `S` key
+- ⌨️ **Keyboard Shortcuts** - Quick access to pause (`P`), sound (`S`), and answer selection (`1-4`)
+- 🎨 **Quicksand Typography** - Beautiful, modern font that's perfect for educational content
+- 🎨 **Gradient Themes** - Elegant color schemes with unique mascots (Butterfly, Flower, Deer, Cloud)
+
 ## 🎯 Features
 
 ### Core Features
@@ -10,6 +21,8 @@ A complete web-based math learning game designed for Grade 1 students, focusing 
 - ✅ **Visual Feedback**: Green highlight for correct, red for wrong answers
 - ✅ **Score System**: +1 point for each correct answer (with combo multipliers!)
 - ✅ **Dynamic Timer**: Countdown timer that varies by difficulty + bonus time for correct answers
+- ✅ **Visual Timer Progress Bar**: Animated progress bar shows time remaining at a glance (turns red when low!)
+- ✅ **Pause/Resume**: Pause anytime during gameplay with button or `P` key
 - ✅ **Wrong Answer Limit**: Game ends after 5 wrong answers (with visual warning at 3)
 - ✅ **Kid-Friendly Design**: Bright colors, large buttons, emojis
 - ✅ **Mobile Responsive**: Works on phones, tablets, and desktops
@@ -21,9 +34,11 @@ A complete web-based math learning game designed for Grade 1 students, focusing 
 - 🎮 **Answer Modes**: Multiple Choice (4 options) or Type Answer (manual input)
 - 🏆 **High Score Tracking**: Saves best score per difficulty/mode in browser
 - 🎵 **Audio System**: 
-  - Sound effects for correct/wrong answers
-  - Optional background music with calming chord progression
-  - Music toggle button with on/off states
+  - 🔊 **Sound Effects**: Pleasant ding for correct, gentle buzz for wrong, celebration chord for streaks
+  - 🔊 **Sound Toggle**: Enable/disable sound effects with button or `S` key (on by default)
+  - 🎵 **Background Music**: Optional calming chord progression
+  - 🎵 **Music Toggle**: Enable/disable background music independently
+  - **Web Audio API**: All sounds generated in-browser, no external files needed
 - ✨ **Animations**: Confetti, particle effects (stars, sparkles), mascot animations
 - 🎭 **Interactive Mascot**: Reacts with 5 different moods based on your performance
   - **Lavender Fields**: Beautiful butterfly with purple wings 🦋
@@ -86,20 +101,30 @@ python3 -m http.server 8000
    - Click "🚀 Start Game!"
    - You have 60 seconds to answer as many questions as possible
    - ⚠️ **Game ends if you get 5 wrong answers!**
+   - Watch the **progress bar** under the timer - it shows time remaining visually
 
-3. **Answer Questions**:
+3. **Pause Anytime** (NEW!):
+   - Click **⏸ Pause** button or press **`P`** key during gameplay
+   - Game freezes - timer stops, questions hidden
+   - **Pause Options:**
+     - **▶️ Resume Game** - Continue from where you paused
+     - **⚙️ Change Settings** - Quit and adjust difficulty/mode/theme
+   - Perfect for bathroom breaks or changing your mind mid-game!
+
+4. **Answer Questions**:
    - Read the math problem
    - Click on the correct answer from 3 options
    - ✅ Correct = Green highlight + confetti + next question
    - ❌ Wrong = Red highlight + shake animation, try again (but be careful!)
 
-4. **Track Your Progress**:
+5. **Track Your Progress**:
    - ⭐ Score: Total correct answers
    - ❌ Wrong: Wrong answers count (max 4, then game over!)
-   - ⏱️ Time: Seconds remaining
+   - ⏱️ Time: Seconds remaining with visual progress bar
+   - 📊 **Progress Bar**: Blue bar shows time remaining, turns orange/red when low (<20%)
    - ❓ Question: Current question number
 
-5. **Game Over & Final Score Screen**:
+6. **Game Over & Final Score Screen**:
    - ⏰ Time runs out (varies by difficulty), OR
    - ❌ Get 5 wrong answers
    - **Detailed Score Breakdown** displays:
@@ -114,6 +139,23 @@ python3 -m http.server 8000
    - Choose your next action:
      - 🔄 **Play Again** - Start new game with same settings
      - ⚙️ **Change Settings** - Adjust difficulty/mode before next game
+
+## ⌨️ Keyboard Shortcuts
+
+Master these shortcuts for faster gameplay:
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| **`P`** | Pause/Resume | Toggle pause during gameplay |
+| **`S`** | Toggle Sound | Turn sound effects on/off |
+| **`1-4`** | Select Answer | Quick answer selection in Multiple Choice mode |
+| **`Enter`** | Submit Answer | Submit answer in Type Answer mode |
+
+**💡 Pro Tips:**
+- Use `P` for quick breaks without losing your progress
+- Press `S` if you need to play silently
+- Number keys `1-4` correspond to answer positions (top-left, top-right, bottom-left, bottom-right)
+- All shortcuts work during active gameplay only
 
 ## 📁 File Structure
 
@@ -149,11 +191,12 @@ python3 -m http.server 8000
 ## 🔧 Technical Details
 
 ### Technologies Used
-- **HTML5**: Structure
-- **CSS3**: Styling with gradients, animations, flexbox, grid
-- **Vanilla JavaScript**: No libraries or frameworks
-- **Web Audio API**: Simple sound effects
-- **localStorage**: High score persistence
+- **HTML5**: Semantic structure with accessibility features
+- **CSS3**: Advanced styling with gradients, animations, flexbox, grid, transitions
+- **Vanilla JavaScript**: No libraries or frameworks - pure ES6+
+- **Web Audio API**: Real-time sound synthesis for effects and music
+- **localStorage**: Persistent high score tracking and settings
+- **Google Fonts**: Quicksand typography for elegant, readable text
 
 ### Key Functions
 
@@ -164,19 +207,24 @@ handleWrongAnswer()          // Processes wrong answers, manages learning mode
 startGame()                  // Initializes game with selected settings
 endGame()                    // Ends game and shows score screen
 showScoreScreen()            // Displays final score breakdown with statistics
-createMascotForTheme()       // Creates theme-specific mascot (astronaut, fish, monkey, cupcake)
+resetGame()                  // Resets all game state to initial values
+pauseGame()                  // Pauses game - freezes timer and disables controls
+resumeGame()                 // Resumes game - continues from paused state
+createMascotForTheme()       // Creates theme-specific mascot (butterfly, flower, deer, cloud)
 setMascotMood()              // Changes mascot expression (5 different moods)
 spawnConfetti()              // Creates falling confetti celebration
 spawnParticles()             // Creates particle burst effects (stars, sparkles)
 getTimeSettings()            // Returns time config based on difficulty
 startTimer()                 // Dynamic countdown with bonus time mechanics
+updateTimerDisplay()         // Updates time text and progress bar
 updateUI()                   // Refreshes all UI elements
 
 // Audio System
-audio.playSfx(type)          // Plays sound effects (correct/wrong)
+audio.playSfx(type)          // Plays sound effects (correct/wrong/streak)
 audio.startMusic()           // Starts background chord progression
 audio.stopMusic()            // Stops background music
 audio.toggleMusic()          // Toggles music on/off
+audio.soundEnabled           // Boolean flag for sound effects
 ```
 
 ## 🎯 Difficulty Levels
@@ -265,19 +313,45 @@ Choose how players should answer questions:
 
 ## 🎵 Audio System
 
-### Sound Effects
-- **Correct Answer**: Three ascending notes (C-E-G)
-- **Wrong Answer**: Two descending notes
-- Uses Web Audio API (no external files needed)
-- Volume optimized for classroom use
+### Sound Effects (Toggle: 🔊 Button or `S` Key)
+**On by default** - provides engaging audio feedback for better learning:
 
-### Background Music
-- **Optional Feature**: Toggle on/off with 🎵 Music button
+- **✅ Correct Answer**: Pleasant rising ding (800Hz → 1200Hz sine wave)
+  - Duration: 0.3 seconds
+  - Smooth envelope for gentle sound
+  - Plays immediately on correct answer
+  
+- **❌ Wrong Answer**: Gentle descending buzz (200Hz → 100Hz sawtooth wave)
+  - Duration: 0.2 seconds
+  - Not harsh or discouraging
+  - Helps students recognize mistakes
+  
+- **🔥 Streak Celebration**: Triumphant chord (C-E-G, 523-659-784 Hz)
+  - Plays every 5 correct answers in a row
+  - Three notes in sequence (0.1s apart)
+  - Motivates students to keep streak going!
+
+**Features:**
+- Generated with Web Audio API (no external files)
+- Volume optimized for classroom use
+- Independent from background music
+- Can be disabled for silent practice
+
+### Background Music (Toggle: 🎵 Button)
+**Off by default** - optional ambient music for relaxed practice:
+
 - **Chord Progression**: Pleasant C-G-Am-F loop
 - **Tempo**: Slow 2-second chord changes for calming effect
-- **Volume**: Low (8%) to not distract from gameplay
+- **Volume**: Very low (8%) to not distract from gameplay
 - **Auto-Stop**: Automatically stops when game ends or returning to settings
 - **No External Files**: Generated entirely with Web Audio API
+- **Independent Control**: Works separately from sound effects
+
+**When to Use Music:**
+- Relaxed practice sessions
+- Reducing test anxiety
+- Creating calming atmosphere
+- Background ambiance in noisy environments
 
 ## 🎭 Interactive Mascots
 
@@ -350,6 +424,12 @@ Best for: Serious study time
 
 - **Correct Answer**: Pulse effect + colorful confetti + particle burst (stars, sparkles)
 - **Wrong Answer**: Shake effect
+- **Timer Progress Bar**: 
+  - Smooth 1-second transition as time counts down
+  - Blue gradient (normal) → Orange/Red gradient (low time warning <20%)
+  - Pulsing animation when time is critical
+  - Grows when bonus time is earned
+- **Pause Screen**: Backdrop blur + slide-up entrance animation
 - **Mascot Moods**: Bounce (happy), shake (sad), spin (excited) with smooth transitions
 - **Theme Selection**: Pulsing gradient on active theme button
 - **Score Screen**: Fade-in backdrop, slide-up entrance, bouncing emoji, score counter, wiggling badge
@@ -362,11 +442,11 @@ Best for: Serious study time
 
 ### Easy Additions
 1. **More Time Options**: 30s, 90s, unlimited
-2. **Streak Counter**: Track consecutive correct answers
-3. **Achievements**: Unlock badges for milestones
-4. **More Operations**: Multiplication (for older grades)
-5. **Custom Number Range**: Let teachers set min/max
-6. **Sound Toggle**: Mute button for quiet environments
+2. **Visual Streak Counter**: Display current streak on screen during gameplay
+3. **Achievements System**: Unlock badges for milestones (partially coded, needs completion)
+4. **More Operations**: Multiplication and division (for older grades)
+5. **Custom Number Range**: Let teachers set min/max values
+6. **Show Correct Answer**: Display correct answer when wrong for learning
 
 ### Advanced Features
 1. **Progress Tracking**: Save performance over time
@@ -401,17 +481,36 @@ const operations = {
 
 ### Sounds Not Working?
 - Most browsers require user interaction before playing audio
-- Click "Start Game" first
-- Check browser audio permissions
+- Click "Start Game" first to enable audio context
+- Check browser audio permissions in settings
+- Try toggling sound with `S` key or 🔊 button
+- Check device volume and ensure it's not muted
+
+### Timer Progress Bar Not Updating?
+- Ensure JavaScript is enabled in your browser
+- Try refreshing the page (Ctrl+F5 or Cmd+Shift+R)
+- Clear browser cache if issues persist
+
+### Pause Button Not Showing?
+- Pause button only appears during active gameplay
+- Start a game first, then pause button will replace start button
+- Try pressing `P` key as alternative
 
 ### High Scores Not Saving?
 - Ensure cookies/localStorage are enabled
 - Private/Incognito mode may not persist data
+- Check browser settings for site data permissions
 
 ### Layout Issues on Mobile?
 - Try rotating device (landscape mode)
 - Zoom out if text is too large
 - Update to latest browser version
+- Clear browser cache and reload
+
+### Keyboard Shortcuts Not Working?
+- Ensure game is in focus (click on game area)
+- Number keys only work in Multiple Choice mode during gameplay
+- `P` and `S` keys only work during active gameplay
 
 ## 📝 Browser Compatibility
 
@@ -428,6 +527,29 @@ This is a free educational tool. Feel free to modify and use in classrooms!
 
 Created for Grade 1 math learning with love and fun! 🎉
 
+**Features Highlights:**
+- 🎨 Beautiful gradient themes with unique mascots
+- 🎵 Engaging sound system with pleasant feedback
+- ⏸️ Full pause/resume control
+- ⌨️ Keyboard shortcuts for power users
+- 📊 Comprehensive statistics and analytics
+- 🎓 Perfect for classroom or home learning
+
 ---
 
-**Ready to play? Open `index.html` and start learning math the fun way!** 🚀
+## 🚀 Quick Start
+
+**Ready to play?**
+1. Open `index.html` in your browser
+2. Choose your difficulty and theme
+3. Click "🚀 Start Game!"
+4. Press `P` to pause, `S` to toggle sound
+5. Have fun learning math! 🎉
+
+**For Teachers:**
+- Use Learning Mode for practice without pressure
+- Toggle sound off for quiet classrooms
+- Multiple difficulty levels for differentiated instruction
+- Track progress with detailed statistics
+
+**Need Help?** Check the troubleshooting section above or review the keyboard shortcuts! ⌨️

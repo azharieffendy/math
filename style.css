@@ -128,6 +128,26 @@ h1{margin:0;font-size:1.8rem;color:var(--accent);font-weight:700;text-shadow:2px
 .stat-label{display:none}
 .stat-value{font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+/* Timer Progress Bar */
+.timer-stat .stat-content{display:flex;flex-direction:column;gap:4px}
+.timer-progress-bar{width:100%;height:4px;background:rgba(0,0,0,0.1);border-radius:2px;overflow:hidden;margin-top:2px}
+.timer-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;transition:width 1s linear,background 0.3s ease;width:100%}
+.timer-progress-fill.warning{background:linear-gradient(90deg,#f59e0b,#ef4444);animation:pulse-warning 0.5s ease-in-out infinite}
+@keyframes pulse-warning{
+  0%, 100%{opacity:1}
+  50%{opacity:0.7}
+}
+
+/* Pause Screen */
+.pause-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:999;padding:20px;animation:fadeIn 0.3s ease-out}
+.pause-overlay.show{display:flex}
+.pause-content{background:var(--card);border-radius:20px;padding:40px;max-width:450px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)}
+.pause-emoji{font-size:4rem;margin-bottom:16px}
+.pause-title{font-size:2rem;font-weight:700;color:var(--accent);margin:0 0 8px 0}
+.pause-subtitle{font-size:1rem;color:#666;margin-bottom:24px}
+.pause-actions{display:flex;flex-direction:column;gap:12px;width:100%}
+.pause-actions .btn-large{width:100%;min-width:auto}
+
 .game-area{display:flex;gap:18px;margin-top:18px;align-items:flex-start}
 .left{flex:1;max-width:600px;margin:0 auto;width:100%;box-sizing:border-box}
 
@@ -216,6 +236,11 @@ h1{margin:0;font-size:1.8rem;color:var(--accent);font-weight:700;text-shadow:2px
   .wrap{width:100%;max-width:none}
   .game-card{margin:0;border-radius:8px;padding:16px}
   
+  /* Pause screen responsive */
+  .pause-content{padding:24px}
+  .pause-emoji{font-size:3rem}
+  .pause-title{font-size:1.6rem}
+  .pause-subtitle{font-size:0.9rem}
   /* Score screen responsive */
   .score-screen-content{padding:18px}
   .score-emoji{font-size:2.5rem}

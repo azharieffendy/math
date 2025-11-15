@@ -2,8 +2,8 @@
 const Game = (() => {
   // State
   const state = {
-    score:0, wrong:0, timeLeft:60, qnum:0, currentAnswer:null, streak:0, combo:1,
-    difficulty:'easy', mode:'mixed', answerMode:'choice', running:false, learningMode:false,
+    score:0, wrong:0, timeLeft:60, maxTime:60, qnum:0, currentAnswer:null, streak:0, combo:1,
+    difficulty:'easy', mode:'mixed', answerMode:'choice', running:false, learningMode:false, paused:false,
     highScores:{}, unlockedThemes: new Set(['lavender-fields']), achievements: new Set(), audio:null,
     // Game statistics
     correctAnswers: 0, wrongAnswers: 0, totalQuestions: 0, bestStreak: 0,
@@ -18,7 +18,12 @@ const Game = (() => {
     question: $('#question'), answers: $('#answers'), feedback: $('#feedback'),
     score: $('#score'), wrong: $('#wrong'), time: $('#time'), qnum: $('#qnum'),
     startBtn: $('#startBtn'), learningToggle: $('#learningToggle'), musicToggle: $('#musicToggle'),
+    pauseBtn: $('#pauseBtn'), soundToggle: $('#soundToggle'),
     mascot: $('#mascotSvg'), rewardPopup: $('#rewardPopup'), questionCard: document.querySelector('.question-card'),
+    // Timer progress bar
+    timerProgress: $('#timerProgress'),
+    // Pause screen
+    pauseOverlay: $('#pauseOverlay'), resumeBtn: $('#resumeBtn'), pauseChangeSettingsBtn: $('#pauseChangeSettingsBtn'),
     // Answer input refs
     answerInputContainer: $('#answerInputContainer'), answerInput: $('#answerInput'), submitBtn: $('#submitBtn'),
     // Score screen refs
@@ -42,6 +47,7 @@ const Game = (() => {
       this.bgOscillators = []; 
       this.bgPlaying = false;
       this.musicEnabled = false;
+      this.soundEnabled = true; // Sound effects enabled by default
     }
     
     init(){ 
@@ -49,21 +55,53 @@ const Game = (() => {
       this.ctx = new (window.AudioContext||window.webkitAudioContext)(); 
     }
     
+    // Enhanced sound effects
     playSfx(type){
+      if(!this.soundEnabled) return; // Check if sound is enabled
       try{
         this.init();
+        const now = this.ctx.currentTime;
         const o = this.ctx.createOscillator(); 
         const g = this.ctx.createGain();
-        o.type = type==='correct' ? 'triangle' : 'square';
-        o.frequency.value = type==='correct' ? 880 : 220;
-        g.gain.value = 0.001; 
+        
+        if(type === 'correct'){
+          // Pleasant ding sound
+          o.type = 'sine';
+          o.frequency.setValueAtTime(800, now);
+          o.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+          g.gain.setValueAtTime(0.15, now);
+          g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          o.start(now);
+          o.stop(now + 0.3);
+        } else if(type === 'wrong'){
+          // Gentle buzz
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(200, now);
+          o.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+          g.gain.setValueAtTime(0.1, now);
+          g.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+          o.start(now);
+          o.stop(now + 0.2);
+        } else if(type === 'streak'){
+          // Celebration sound
+          const frequencies = [523, 659, 784]; // C-E-G chord
+          frequencies.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.08, now + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
+            gain.connect(this.ctx.destination);
+            osc.connect(gain);
+            osc.start(now + i * 0.1);
+            osc.stop(now + i * 0.1 + 0.3);
+          });
+          return; // Skip the default connection below
+        }
+        
         g.connect(this.ctx.destination);
         o.connect(g);
-        const now = this.ctx.currentTime;
-        g.gain.exponentialRampToValueAtTime(0.15, now+0.01);
-        g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
-        o.start(now); 
-        o.stop(now+0.45);
       }catch(e){/* audio blocked */}
     }
     
@@ -172,8 +210,8 @@ const Game = (() => {
   function updateUI(){
     refs.score.textContent = state.score;
     refs.wrong.textContent = state.wrong;
-    refs.time.textContent = state.timeLeft;
     refs.qnum.textContent = state.qnum;
+    updateTimerDisplay();
   }
 
   function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)}
@@ -597,6 +635,10 @@ const Game = (() => {
     if(btn) btn.classList.add('correct');
     showFeedback(true);
     audio.playSfx('correct');
+    // Play streak sound on milestones (every 5 correct)
+    if(state.streak > 0 && (state.streak + 1) % 5 === 0){
+      setTimeout(() => audio.playSfx('streak'), 200);
+    }
     
     // Show excited mood on streak milestones
     const mood = (state.streak > 0 && state.streak % 3 === 2) ? 'excited' : 'happy';
@@ -613,7 +655,9 @@ const Game = (() => {
     
     // Add bonus time for correct answer
     if(!state.learningMode){
-      state.timeLeft += getTimeSettings().bonus;
+      const bonus = getTimeSettings().bonus;
+      state.timeLeft += bonus;
+      state.maxTime += bonus; // Update max time so progress bar adjusts
     }
     
     maybeAwardStreak();
@@ -697,7 +741,13 @@ const Game = (() => {
   // End game
   function endGame(reason = 'time'){
     state.running = false;
+    state.paused = false;
     clearInterval(state._timer);
+    
+    // Hide pause overlay and button
+    refs.pauseOverlay.classList.remove('show');
+    refs.pauseBtn.style.display = 'none';
+    refs.startBtn.style.display = 'inline-block';
     
     // Hide question card
     if(refs.questionCard) refs.questionCard.classList.remove('show');
@@ -713,8 +763,14 @@ const Game = (() => {
     save();
     updateUI();
     
-    // Show score screen with statistics
-    showScoreScreen(reason, isNewHighScore);
+    // Show score screen with statistics (unless user quit from pause)
+    if(reason === 'paused'){
+      // User quit from pause - just reset without showing score
+      resetGame();
+      setMascotMood('neutral');
+    } else {
+      showScoreScreen(reason, isNewHighScore);
+    }
   }
   
   // Show score screen with breakdown
@@ -784,6 +840,10 @@ const Game = (() => {
       refs.musicToggle.setAttribute('aria-pressed', 'false');
       refs.musicToggle.textContent = '🎵 Music';
     }
+    // Reset game state completely
+    resetGame();
+    // Reset mascot to neutral
+    setMascotMood('neutral');
   }
 
   function startGame(){
@@ -802,7 +862,9 @@ const Game = (() => {
     const initialTime = state.learningMode ? 9999 : getTimeSettings().initial;
     Object.assign(state, {
       running: true,
+      paused: false,
       timeLeft: initialTime,
+      maxTime: initialTime,
       wrong: 0,
       score: 0,
       qnum: 0,
@@ -815,6 +877,11 @@ const Game = (() => {
       bestStreak: 0,
       gameStartTime: Date.now()
     });
+    // Show pause button, hide start button
+    refs.pauseBtn.style.display = 'inline-block';
+    refs.startBtn.style.display = 'none';
+    refs.pauseBtn.textContent = '⏸ Pause';
+    refs.pauseBtn.title = 'Pause game';
     
     // Show question card
     if(refs.questionCard) refs.questionCard.classList.add('show');
@@ -829,7 +896,7 @@ const Game = (() => {
   function startTimer(){
     clearInterval(state._timer);
     state._timer = setInterval(() => {
-      if(!state.running) return;
+      if(!state.running || state.paused) return;
       if(!state.learningMode){
         state.timeLeft--;
         if(state.timeLeft <= 0){
@@ -837,12 +904,41 @@ const Game = (() => {
           endGame('time');
         }
       }
-      refs.time.textContent = state.timeLeft;
+      updateTimerDisplay();
     }, 1000);
+  }
+  
+  function updateTimerDisplay(){
+    refs.time.textContent = state.timeLeft;
+    // Update progress bar
+    if(refs.timerProgress && state.maxTime > 0){
+      const percent = (state.timeLeft / state.maxTime) * 100;
+      refs.timerProgress.style.width = `${Math.max(0, percent)}%`;
+      // Add warning class when time is low (< 20%)
+      if(percent < 20){
+        refs.timerProgress.classList.add('warning');
+      } else {
+        refs.timerProgress.classList.remove('warning');
+      }
+    }
   }
 
   function pauseGame(){ 
-    state.running = !state.running; 
+    if(!state.running || state.paused) return;
+    state.paused = true;
+    setButtonsEnabled(false); // Disable answer buttons
+    refs.pauseOverlay.classList.add('show');
+    refs.pauseBtn.textContent = '▶️ Resume';
+    refs.pauseBtn.title = 'Resume game';
+  }
+  
+  function resumeGame(){
+    if(!state.running || !state.paused) return;
+    state.paused = false;
+    setButtonsEnabled(true); // Re-enable answer buttons
+    refs.pauseOverlay.classList.remove('show');
+    refs.pauseBtn.textContent = '⏸ Pause';
+    refs.pauseBtn.title = 'Pause game';
   }
 
   function resetGame(){ 
@@ -850,19 +946,47 @@ const Game = (() => {
     
     Object.assign(state, {
       running: false,
+      paused: false,
       score: 0,
       wrong: 0,
       timeLeft: 60,
+      maxTime: 60,
       qnum: 0,
       streak: 0,
-      combo: 1
+      combo: 1,
+      // Reset statistics
+      correctAnswers: 0,
+      wrongAnswers: 0,
+      totalQuestions: 0,
+      bestStreak: 0,
+      gameStartTime: null,
+      totalAnswerTime: 0,
+      answersGiven: 0
     });
+    
+    // Reset UI buttons
+    refs.pauseOverlay.classList.remove('show');
+    refs.pauseBtn.style.display = 'none';
+    refs.startBtn.style.display = 'inline-block';
     
     // Hide question card
     if(refs.questionCard) refs.questionCard.classList.remove('show');
     
+    // Reset answer buttons (don't remove them, just reset their state)
+    $$('.answer').forEach(btn => {
+      btn.textContent = '0';
+      btn.className = 'answer';
+      btn.disabled = false;
+    });
+    
+    // Hide manual input if visible
+    if(refs.answerInputContainer){
+      refs.answerInputContainer.style.display = 'none';
+      if(refs.answerInput) refs.answerInput.value = '';
+    }
+    
     updateUI();
-    refs.feedback.textContent = 'Game reset. Press Start';
+    refs.feedback.textContent = '';
   }
 
   function showReward(text){
@@ -968,6 +1092,31 @@ const Game = (() => {
     // Start button
     refs.startBtn.addEventListener('click', startGame);
 
+    // Pause/Resume button
+    refs.pauseBtn.addEventListener('click', () => {
+      if(state.paused){
+        resumeGame();
+      } else {
+        pauseGame();
+      }
+    });
+
+    // Resume button in pause overlay
+    refs.resumeBtn.addEventListener('click', resumeGame);
+
+    // Change Settings button in pause overlay
+    refs.pauseChangeSettingsBtn.addEventListener('click', () => {
+      // End the current game and return to settings
+      endGame('paused');
+    });
+
+    // Sound toggle
+    refs.soundToggle.addEventListener('click', () => {
+      audio.soundEnabled = !audio.soundEnabled;
+      refs.soundToggle.setAttribute('aria-pressed', audio.soundEnabled);
+      refs.soundToggle.textContent = audio.soundEnabled ? '🔊 Sound' : '🔇 Sound';
+    });
+
     // Music toggle
     refs.musicToggle.addEventListener('click', () => {
       const isEnabled = audio.toggleMusic();
@@ -996,10 +1145,24 @@ const Game = (() => {
       });
     }
 
-    // Keyboard support (numbers 1-4 for multiple choice)
+    // Keyboard support
     document.addEventListener('keydown', (e) => {
-      // Only handle number keys in multiple choice mode
-      if(state.answerMode === 'choice' && ['1', '2', '3', '4'].includes(e.key)){
+      // Pause with P key
+      if(e.key.toLowerCase() === 'p' && state.running){
+        if(state.paused){
+          resumeGame();
+        } else {
+          pauseGame();
+        }
+        return;
+      }
+      // Toggle sound with S key
+      if(e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey){
+        refs.soundToggle.click();
+        return;
+      }
+      // Only handle number keys in multiple choice mode during gameplay
+      if(state.answerMode === 'choice' && state.running && !state.paused && ['1', '2', '3', '4'].includes(e.key)){
         const idx = parseInt(e.key) - 1;
         const btn = document.querySelectorAll('.answer')[idx];
         if(btn) btn.click();
