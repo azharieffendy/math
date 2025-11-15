@@ -75,6 +75,14 @@
           </div>
 
           <div class="settings-section">
+            <div class="section-label">Answer Mode</div>
+            <div class="settings-group">
+              <div class="option active" data-answer-mode="choice">🔘 Multiple Choice</div>
+              <div class="option" data-answer-mode="input">⌨️ Type Answer</div>
+            </div>
+          </div>
+
+          <div class="settings-section">
             <div class="section-label">Theme</div>
             <div class="theme-picker">
               <div class="theme" data-theme="space">🚀</div>
@@ -140,6 +148,18 @@
               <button class="answer" data-index="1" tabindex="-1">0</button>
               <button class="answer" data-index="2" tabindex="-1">0</button>
               <button class="answer" data-index="3" tabindex="-1">0</button>
+            </div>
+            <div class="answer-input-container" id="answerInputContainer" style="display: none;">
+              <input type="number" 
+                     id="answerInput" 
+                     class="answer-input" 
+                     placeholder="Type your answer..." 
+                     tabindex="-1"
+                     inputmode="numeric"
+                     autocomplete="off" />
+              <button class="submit-btn" id="submitBtn" tabindex="-1">
+                ✓ Submit
+              </button>
             </div>
             <div class="feedback" id="feedback">Welcome! Press Start to play.</div>
           </div>

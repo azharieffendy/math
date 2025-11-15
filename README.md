@@ -17,7 +17,8 @@ A complete web-based math learning game designed for Grade 1 students, focusing 
 
 ### Bonus Features Included
 - 🎚️ **Difficulty Levels**: Easy (1-digit), Medium (mixed 1&2-digit), Hard (2-digit) with adaptive timers
-- 📚 **Game Modes**: Addition only, Subtraction only, or Mixed
+- 📚 **Operation Modes**: Addition only, Subtraction only, or Mixed
+- 🎮 **Answer Modes**: Multiple Choice (4 options) or Type Answer (manual input)
 - 🏆 **High Score Tracking**: Saves best score per difficulty/mode in browser
 - 🎵 **Audio System**: 
   - Sound effects for correct/wrong answers
@@ -57,6 +58,7 @@ python3 -m http.server 8000
 1. **Choose Settings**:
    - Select difficulty: Easy (😊), Medium (😎), or Hard (🔥)
    - Select mode: Mixed (➕➖), Addition (➕), or Subtraction (➖)
+   - Select answer mode: Multiple Choice (🔘) or Type Answer (⌨️)
    - Optional: Click 🎵 Music to enable calming background music
    - Optional: Click 📖 Learning Mode for unlimited time and retry chances
 
@@ -173,6 +175,26 @@ audio.toggleMusic()          // Toggles music on/off
 | Hard   | 120 seconds   | +30 seconds                   |
 
 Each correct answer adds bonus time to the countdown timer, allowing players to keep playing longer and achieve higher scores!
+
+## 🎮 Answer Modes
+
+Choose how players should answer questions:
+
+### 🔘 Multiple Choice (Default)
+- **What it is**: 4 answer buttons to choose from
+- **How to answer**: Click the button or press 1-4 on keyboard
+- **Difficulty**: Easier - good for beginners
+- **Features**: Smart wrong answers that prevent guessing tricks
+- **Best for**: Learning, building confidence, younger students
+
+### ⌨️ Type Answer (Manual Input)
+- **What it is**: Type the answer directly
+- **How to answer**: Type number and press Enter or click Submit
+- **Difficulty**: Harder - requires knowing the exact answer
+- **Features**: No hints from multiple choice options
+- **Best for**: Advanced students, building mental math skills, testing true knowledge
+
+**💡 Tip**: Start with Multiple Choice to learn, then switch to Type Answer for a real challenge!
 
 ## 🎲 Random Question Generation
 

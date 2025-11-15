@@ -3,7 +3,7 @@ const Game = (() => {
   // State
   const state = {
     score:0, wrong:0, timeLeft:60, qnum:0, currentAnswer:null, streak:0, combo:1,
-    difficulty:'easy', mode:'mixed', running:false, learningMode:false,
+    difficulty:'easy', mode:'mixed', answerMode:'choice', running:false, learningMode:false,
     highScores:{}, unlockedThemes: new Set(['space']), achievements: new Set(), audio:null,
     // Game statistics
     correctAnswers: 0, wrongAnswers: 0, totalQuestions: 0, bestStreak: 0,
@@ -19,6 +19,8 @@ const Game = (() => {
     score: $('#score'), wrong: $('#wrong'), time: $('#time'), qnum: $('#qnum'),
     startBtn: $('#startBtn'), learningToggle: $('#learningToggle'), musicToggle: $('#musicToggle'),
     mascot: $('#mascotSvg'), rewardPopup: $('#rewardPopup'), questionCard: document.querySelector('.question-card'),
+    // Answer input refs
+    answerInputContainer: $('#answerInputContainer'), answerInput: $('#answerInput'), submitBtn: $('#submitBtn'),
     // Score screen refs
     scoreScreen: $('#scoreScreen'), scoreEmoji: $('#scoreEmoji'), scoreTitle: $('#scoreTitle'),
     scoreSubtitle: $('#scoreSubtitle'), finalScore: $('#finalScore'), highScoreBadge: $('#highScoreBadge'),
@@ -387,27 +389,62 @@ const Game = (() => {
     
     const arr = shuffle(Array.from(answers));
     
-    // Reuse existing buttons - just update text and handler
-    const buttons = $$('.answer');
-    buttons.forEach((btn, index) => {
-      const value = arr[index];
+    // Show/hide UI elements based on answer mode
+    if(state.answerMode === 'input'){
+      // Manual input mode: hide buttons, show input
+      refs.answers.style.display = 'none';
+      refs.answerInputContainer.style.display = 'flex';
+      refs.answerInput.value = '';
+      refs.answerInput.focus();
+    } else {
+      // Multiple choice mode: show buttons, hide input
+      refs.answers.style.display = 'grid';
+      refs.answerInputContainer.style.display = 'none';
       
-      // Remove old listener if exists
-      if(buttonHandlers.has(btn)) {
-        btn.removeEventListener('click', buttonHandlers.get(btn));
-      }
-      
-      // Update button
-      btn.textContent = value;
-      btn.className = 'answer';
-      btn.disabled = false;
-      
-      // Add new listener
-      const handler = ()=> handleAnswer(value, btn);
-      buttonHandlers.set(btn, handler);
-      btn.addEventListener('click', handler);
-    });
+      // Reuse existing buttons - just update text and handler
+      const buttons = $$('.answer');
+      buttons.forEach((btn, index) => {
+        const value = arr[index];
+        
+        // Remove old listener if exists
+        if(buttonHandlers.has(btn)) {
+          btn.removeEventListener('click', buttonHandlers.get(btn));
+        }
+        
+        // Update button
+        btn.textContent = value;
+        btn.className = 'answer';
+        btn.disabled = false;
+        
+        // Add new listener
+        const handler = ()=> handleAnswer(value, btn);
+        buttonHandlers.set(btn, handler);
+        btn.addEventListener('click', handler);
+      });
+    }
 
+    updateUI();
+  }
+
+  // Handle manual input submission
+  function handleManualInputSubmit(){
+    if(!state.running && !state.learningMode) return;
+    
+    const inputValue = refs.answerInput.value.trim();
+    if(inputValue === '') return; // Don't submit empty input
+    
+    const userAnswer = parseInt(inputValue);
+    if(isNaN(userAnswer)) return; // Invalid input
+    
+    // Disable input while processing
+    refs.answerInput.disabled = true;
+    refs.submitBtn.disabled = true;
+    
+    if(userAnswer === state.currentAnswer){
+      handleCorrectAnswer(null, true); // Pass null for btn, true for isManualInput
+    } else {
+      handleWrongAnswer(null, true); // Pass null for btn, true for isManualInput
+    }
     updateUI();
   }
 
@@ -426,8 +463,8 @@ const Game = (() => {
   }
   
   // Handle correct answer logic
-  function handleCorrectAnswer(btn){
-    btn.classList.add('correct');
+  function handleCorrectAnswer(btn, isManualInput = false){
+    if(btn) btn.classList.add('correct');
     showFeedback(true);
     audio.playSfx('correct');
     
@@ -453,19 +490,30 @@ const Game = (() => {
     
     // Visual effects
     spawnConfetti();
-    const rect = btn.getBoundingClientRect();
-    spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    if(btn){
+      const rect = btn.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    } else {
+      // For manual input, spawn particles near the input field
+      const inputRect = refs.answerInput.getBoundingClientRect();
+      spawnParticles(inputRect.left + inputRect.width / 2, inputRect.top + inputRect.height / 2);
+    }
     
     setTimeout(() => {
       setMascotMood('neutral');
       generateQuestion();
       setButtonsEnabled(true);
+      // Re-enable input for manual mode
+      if(isManualInput){
+        refs.answerInput.disabled = false;
+        refs.submitBtn.disabled = false;
+      }
     }, 600);
   }
   
   // Handle wrong answer logic
-  function handleWrongAnswer(btn){
-    btn.classList.add('wrong');
+  function handleWrongAnswer(btn, isManualInput = false){
+    if(btn) btn.classList.add('wrong');
     setMascotMood('sad');
     audio.playSfx('wrong');
     state.wrong++; 
@@ -480,9 +528,14 @@ const Game = (() => {
     
     if(state.learningMode){
       setTimeout(() => {
-        btn.classList.remove('wrong');
+        if(btn) btn.classList.remove('wrong');
         setMascotMood('neutral');
         setButtonsEnabled(true);
+        // Re-enable input for manual mode
+        if(isManualInput){
+          refs.answerInput.disabled = false;
+          refs.submitBtn.disabled = false;
+        }
         refs.feedback.textContent = 'Try again — you got this!';
       }, 700);
     } else {
@@ -490,9 +543,14 @@ const Game = (() => {
         if(state.wrong >= 5){
           endGame('wrong');
         } else {
-          btn.classList.remove('wrong');
+          if(btn) btn.classList.remove('wrong');
           setMascotMood('neutral');
           setButtonsEnabled(true);
+          // Re-enable input for manual mode
+          if(isManualInput){
+            refs.answerInput.disabled = false;
+            refs.submitBtn.disabled = false;
+          }
         }
       }, 800);
     }
@@ -605,8 +663,10 @@ const Game = (() => {
     // Pickup settings from UI
     const diff = document.querySelector('.option[data-difficulty].active');
     const modeEl = document.querySelector('.option[data-mode].active');
+    const answerModeEl = document.querySelector('.option[data-answer-mode].active');
     state.difficulty = diff ? diff.dataset.difficulty : state.difficulty;
     state.mode = modeEl ? modeEl.dataset.mode : state.mode;
+    state.answerMode = answerModeEl ? answerModeEl.dataset.answerMode : state.answerMode;
     
     // Reset game state
     const initialTime = state.learningMode ? 9999 : getTimeSettings().initial;
@@ -758,6 +818,11 @@ const Game = (() => {
       o.addEventListener('click', () => setActiveOption('.option[data-mode]', o));
     });
 
+    // Answer mode options
+    document.querySelectorAll('.option[data-answer-mode]').forEach(o => {
+      o.addEventListener('click', () => setActiveOption('.option[data-answer-mode]', o));
+    });
+
     // Theme picker
     document.querySelectorAll('.theme').forEach(t => {
       t.addEventListener('click', () => {
@@ -783,9 +848,24 @@ const Game = (() => {
       refs.learningToggle.textContent = state.learningMode ? '📖 Learning: On' : '📖 Learning Mode';
     });
 
-    // Keyboard support (numbers 1-4)
+    // Manual input submit button
+    if(refs.submitBtn){
+      refs.submitBtn.addEventListener('click', handleManualInputSubmit);
+    }
+    
+    // Manual input Enter key support
+    if(refs.answerInput){
+      refs.answerInput.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' && state.running){
+          handleManualInputSubmit();
+        }
+      });
+    }
+
+    // Keyboard support (numbers 1-4 for multiple choice)
     document.addEventListener('keydown', (e) => {
-      if(['1', '2', '3', '4'].includes(e.key)){
+      // Only handle number keys in multiple choice mode
+      if(state.answerMode === 'choice' && ['1', '2', '3', '4'].includes(e.key)){
         const idx = parseInt(e.key) - 1;
         const btn = document.querySelectorAll('.answer')[idx];
         if(btn) btn.click();

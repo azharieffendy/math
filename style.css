@@ -148,6 +148,15 @@ h1{margin:0;font-size:1.8rem;color:var(--accent);font-weight:900;text-shadow:2px
 
 .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px;width:100%;min-height:150px}
 .answer{padding:16px;border-radius:18px;font-size:1.8rem;border:4px solid rgba(255,255,255,0.8);cursor:pointer;font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#f0f9ff 100%);box-shadow:0 8px 20px rgba(0,0,0,0.15);z-index:1;position:relative;min-height:70px;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;transition:all 0.2s ease}
+.answer-input-container{display:flex;gap:12px;margin-top:16px;width:100%;align-items:center;justify-content:center;min-height:150px}
+.answer-input{flex:1;padding:20px;border-radius:18px;font-size:2rem;border:4px solid rgba(255,255,255,0.8);font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#f0f9ff 100%);box-shadow:0 8px 20px rgba(0,0,0,0.15);text-align:center;transition:all 0.2s ease;-webkit-appearance:none;-moz-appearance:none;appearance:none;color:var(--text)}
+.answer-input:focus{outline:none;border-color:var(--accent);box-shadow:0 8px 24px rgba(0,0,0,0.3);transform:scale(1.02)}
+.answer-input::placeholder{color:rgba(0,0,0,0.3);font-weight:600}
+.answer-input:disabled{opacity:0.6;cursor:not-allowed}
+.submit-btn{padding:20px 32px;border-radius:18px;font-size:1.5rem;border:4px solid rgba(255,255,255,0.8);cursor:pointer;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:white;box-shadow:0 8px 20px rgba(0,0,0,0.15);transition:all 0.2s ease;-webkit-appearance:none;-moz-appearance:none;appearance:none;white-space:nowrap}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,0.25)}
+.submit-btn:active{transform:translateY(1px);box-shadow:0 4px 10px rgba(0,0,0,0.2)}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
 .answer:active{transform:scale(0.95) translateY(3px);box-shadow:0 4px 10px rgba(0,0,0,0.2)}
 @media (hover: hover) {
   .answer:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 12px 28px rgba(0,0,0,0.2)}
@@ -302,6 +311,9 @@ footer{display:flex;justify-content:space-between;align-items:center;margin-top:
   .q-operator{font-size:1.4rem;width:28px}
   .answers{grid-template-columns:1fr 1fr;gap:10px}
   .answer{padding:10px;font-size:max(1.2rem, 16px)}
+  .answer-input-container{flex-direction:column;gap:10px}
+  .answer-input{padding:16px;font-size:1.5rem}
+  .submit-btn{padding:16px 24px;font-size:1.2rem;width:100%}
 }
 
 @media (max-width:420px){
