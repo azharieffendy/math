@@ -3,6 +3,25 @@ MATH FUN GAME - IMPROVEMENT TODO LIST
 
 RECENT UPDATES (2025-11-15)
 ---------------------------
+✓ Updated typography to Quicksand font:
+  - Replaced Comic Sans MS with elegant Quicksand from Google Fonts
+  - Using weights: 400 (regular), 500 (medium), 600 (semi-bold), 700 (bold)
+  - Adjusted all font-weights to match available Quicksand weights (max 700)
+  - Rounded, friendly letterforms that match gradient themes perfectly
+  - Excellent readability for educational content
+  - Modern, professional appearance while still being kid-friendly
+  - Font loads from Google Fonts CDN with preconnect optimization
+✓ Beautiful gradient themes with unique mascots:
+  - Replaced kid themes with elegant color gradients
+  - Lavender Fields (purple gradient): Butterfly mascot 🦋
+  - Hydrangea (blue-pink gradient): Flower mascot 🌸
+  - Lush Forest (dark to light green): Deer mascot 🌲
+  - Stormy Morning (gray gradient): Cloud mascot ⛈️
+  - Each theme has carefully crafted color palette
+  - Mascots designed to match theme aesthetic
+  - Smooth gradients from dark to light
+  - Professional and calming visual design
+
 ✓ Answer mode selection (Multiple Choice vs Manual Input):
   - Players can choose between clicking answer buttons or typing answers
   - Multiple Choice: 4 buttons with smart wrong answers (default, easier)

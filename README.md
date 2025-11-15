@@ -26,9 +26,29 @@ A complete web-based math learning game designed for Grade 1 students, focusing 
   - Music toggle button with on/off states
 - ✨ **Animations**: Confetti, particle effects (stars, sparkles), mascot animations
 - 🎭 **Interactive Mascot**: Reacts with 5 different moods based on your performance
-- 🎨 **Multiple Themes**: Space, Underwater, Jungle, Candy with active highlighting
+  - **Lavender Fields**: Beautiful butterfly with purple wings 🦋
+  - **Hydrangea**: Lovely flower with pink/blue petals 🌸
+  - **Lush Forest**: Friendly deer with antlers 🌲
+  - **Stormy Morning**: Cute cloud with rain drops ⛈️
+- 🎨 **Multiple Themes**: Beautiful gradient themes with elegant color palettes
 - 📊 **Detailed Statistics**: Accuracy, speed, streaks, and comprehensive game analytics
 - 📱 **Fully Responsive**: Adapts to any screen size
+
+## 🎨 Typography
+
+The game uses the **Quicksand** font from Google Fonts - a rounded, friendly sans-serif that perfectly matches the elegant gradient themes.
+
+**Font Weights Used:**
+- Regular (400): Body text, descriptions
+- Medium (500): Secondary elements
+- Semi-Bold (600): Options, selections
+- Bold (700): Headings, buttons, numbers
+
+**Why Quicksand?**
+- Soft, rounded letterforms that are friendly yet professional
+- Excellent readability at all sizes
+- Modern aesthetic that complements gradient themes
+- Great for educational content
 
 ## 🚀 How to Run
 
@@ -144,6 +164,7 @@ handleWrongAnswer()          // Processes wrong answers, manages learning mode
 startGame()                  // Initializes game with selected settings
 endGame()                    // Ends game and shows score screen
 showScoreScreen()            // Displays final score breakdown with statistics
+createMascotForTheme()       // Creates theme-specific mascot (astronaut, fish, monkey, cupcake)
 setMascotMood()              // Changes mascot expression (5 different moods)
 spawnConfetti()              // Creates falling confetti celebration
 spawnParticles()             // Creates particle burst effects (stars, sparkles)
@@ -257,6 +278,73 @@ Choose how players should answer questions:
 - **Volume**: Low (8%) to not distract from gameplay
 - **Auto-Stop**: Automatically stops when game ends or returning to settings
 - **No External Files**: Generated entirely with Web Audio API
+
+## 🎭 Interactive Mascots
+
+Each theme has its own unique mascot that reacts to your performance!
+
+### 🦋 **Lavender Fields - Butterfly**
+- Beautiful purple wings with patterns
+- Elegant antennae
+- Graceful and calming
+- Perfect for the dreamy lavender theme!
+
+### 🌸 **Hydrangea - Flower**
+- Pink and blue gradient petals
+- Five petals arranged in a circle
+- Green stem with leaves
+- Lovely and elegant!
+
+### 🌲 **Lush Forest - Deer**
+- Brown fur with spotted details
+- Antlers on head
+- Gentle snout
+- Friendly forest companion!
+
+### ⛈️ **Stormy Morning - Cloud**
+- Fluffy gray cloud body
+- Rain drops falling
+- Little lightning bolt accent
+- Cozy and dramatic!
+
+**All mascots show 5 moods:**
+- 😊 **Happy**: Correct answer!
+- 😢 **Sad**: Wrong answer
+- 🤩 **Excited**: Streak milestone!
+- 🤔 **Thinking**: New question appears
+- 😮 **Surprised**: Special moments
+
+## 🎨 Gradient Color Themes
+
+Each theme features a beautiful color gradient that creates a calming, focused environment:
+
+### 🦋 **Lavender Fields**
+```
+Colors: Deep purple (#9b59b6) → Soft lavender (#e8daef)
+Feel: Dreamy, peaceful, calming
+Best for: Relaxed practice sessions
+```
+
+### 🌸 **Hydrangea**
+```
+Colors: Sky blue (#5b9bd5) → Pink blush (#f0b4e4)
+Feel: Elegant, floral, gentle
+Best for: Creative learners
+```
+
+### 🌲 **Lush Forest**
+```
+Colors: Dark emerald (#0e4d3d) → Light mint (#a9dfbf)
+Feel: Natural, fresh, grounding
+Best for: Focus and concentration
+```
+
+### ⛈️ **Stormy Morning**
+```
+Colors: Dark slate (#34495e) → Soft gray (#aeb6bf)
+Feel: Moody, dramatic, cozy
+Best for: Serious study time
+```
 
 ## ✨ Animations
 

@@ -4,7 +4,7 @@ const Game = (() => {
   const state = {
     score:0, wrong:0, timeLeft:60, qnum:0, currentAnswer:null, streak:0, combo:1,
     difficulty:'easy', mode:'mixed', answerMode:'choice', running:false, learningMode:false,
-    highScores:{}, unlockedThemes: new Set(['space']), achievements: new Set(), audio:null,
+    highScores:{}, unlockedThemes: new Set(['lavender-fields']), achievements: new Set(), audio:null,
     // Game statistics
     correctAnswers: 0, wrongAnswers: 0, totalQuestions: 0, bestStreak: 0,
     gameStartTime: null, totalAnswerTime: 0, answersGiven: 0
@@ -207,6 +207,124 @@ const Game = (() => {
     clickedElement.classList.add('active');
   }
 
+  // Create mascot based on theme
+  function createMascotForTheme(theme){
+    const face = document.querySelector('#face');
+    if(!face) return;
+    
+    // Clear existing content
+    face.innerHTML = '';
+    
+    // Get current theme if not provided
+    if(!theme) theme = document.body.getAttribute('data-theme') || 'space';
+    
+    // Update mascot description (same length for consistency)
+    const descriptions = {
+      'lavender-fields': 'Mascot reacts to answers!',
+      'hydrangea': 'Mascot reacts to answers!',
+      'lush-forest': 'Mascot reacts to answers!',
+      'stormy-morning': 'Mascot reacts to answers!'
+    };
+    const descEl = document.querySelector('.mascot-description');
+    if(descEl) descEl.textContent = descriptions[theme] || 'Mascot reacts to your answers!';
+    
+    let mascotHTML = '';
+    
+    if(theme === 'lavender-fields'){
+      // Butterfly
+      mascotHTML = `
+        <!-- Left wing -->
+        <ellipse cx="30" cy="35" rx="18" ry="24" fill="#c39bd3" stroke="#8e44ad" stroke-width="2" />
+        <ellipse cx="28" cy="32" rx="10" ry="14" fill="#e8daef" opacity="0.8" />
+        <circle cx="26" cy="28" r="3" fill="#9b59b6" />
+        <!-- Right wing -->
+        <ellipse cx="70" cy="35" rx="18" ry="24" fill="#c39bd3" stroke="#8e44ad" stroke-width="2" />
+        <ellipse cx="72" cy="32" rx="10" ry="14" fill="#e8daef" opacity="0.8" />
+        <circle cx="74" cy="28" r="3" fill="#9b59b6" />
+        <!-- Body -->
+        <ellipse cx="50" cy="40" rx="8" ry="28" fill="#7d3c98" />
+        <!-- Head -->
+        <circle cx="50" cy="20" r="10" fill="#8e44ad" />
+        <!-- Antennae -->
+        <path d="M 46,12 Q 42,8 40,6" stroke="#8e44ad" stroke-width="2" fill="none" stroke-linecap="round" />
+        <path d="M 54,12 Q 58,8 60,6" stroke="#8e44ad" stroke-width="2" fill="none" stroke-linecap="round" />
+        <circle cx="40" cy="6" r="3" fill="#c39bd3" />
+        <circle cx="60" cy="6" r="3" fill="#c39bd3" />
+        <g id="eyes"></g>
+        <g id="mouth"></g>
+      `;
+    } else if(theme === 'hydrangea'){
+      // Flower
+      mascotHTML = `
+        <!-- Stem (shortened) -->
+        <rect x="47" y="48" width="6" height="18" fill="#27ae60" rx="3" />
+        <!-- Leaves (adjusted) -->
+        <ellipse cx="38" cy="56" rx="8" ry="5" fill="#2ecc71" transform="rotate(-30 38 56)" />
+        <ellipse cx="62" cy="56" rx="8" ry="5" fill="#2ecc71" transform="rotate(30 62 56)" />
+        <!-- Petals (5 petals in circle) -->
+        <ellipse cx="50" cy="22" rx="11" ry="14" fill="#f0b4e4" stroke="#b565d8" stroke-width="2" />
+        <ellipse cx="64" cy="31" rx="11" ry="14" fill="#e89dd8" stroke="#b565d8" stroke-width="2" transform="rotate(72 64 31)" />
+        <ellipse cx="59" cy="48" rx="11" ry="14" fill="#d885c8" stroke="#b565d8" stroke-width="2" transform="rotate(144 59 48)" />
+        <ellipse cx="41" cy="48" rx="11" ry="14" fill="#d885c8" stroke="#b565d8" stroke-width="2" transform="rotate(216 41 48)" />
+        <ellipse cx="36" cy="31" rx="11" ry="14" fill="#e89dd8" stroke="#b565d8" stroke-width="2" transform="rotate(288 36 31)" />
+        <!-- Center circle (face) -->
+        <circle cx="50" cy="36" r="13" fill="#7e5bb5" stroke="#5e3b8f" stroke-width="2" />
+        <g id="eyes"></g>
+        <g id="mouth"></g>
+      `;
+    } else if(theme === 'lush-forest'){
+      // Deer
+      mascotHTML = `
+        <!-- Antlers (adjusted) -->
+        <path d="M 36,20 L 32,14 L 30,18 M 32,14 L 29,11" stroke="#78350f" stroke-width="3" fill="none" stroke-linecap="round" />
+        <path d="M 64,20 L 68,14 L 70,18 M 68,14 L 71,11" stroke="#78350f" stroke-width="3" fill="none" stroke-linecap="round" />
+        <!-- Head -->
+        <ellipse cx="50" cy="40" rx="26" ry="28" fill="#a16207" stroke="#78350f" stroke-width="3" />
+        <!-- Snout -->
+        <ellipse cx="50" cy="52" rx="15" ry="12" fill="#d4a574" />
+        <!-- Nose -->
+        <ellipse cx="50" cy="58" rx="5" ry="4" fill="#4a3020" />
+        <!-- Ears -->
+        <ellipse cx="32" cy="28" rx="7" ry="12" fill="#a16207" stroke="#78350f" stroke-width="2" transform="rotate(-20 32 28)" />
+        <ellipse cx="68" cy="28" rx="7" ry="12" fill="#a16207" stroke="#78350f" stroke-width="2" transform="rotate(20 68 28)" />
+        <ellipse cx="32" cy="29" rx="3.5" ry="7" fill="#d4a574" transform="rotate(-20 32 29)" />
+        <ellipse cx="68" cy="29" rx="3.5" ry="7" fill="#d4a574" transform="rotate(20 68 29)" />
+        <!-- Spots -->
+        <circle cx="40" cy="34" r="2.5" fill="#f0f0f0" opacity="0.8" />
+        <circle cx="60" cy="34" r="2.5" fill="#f0f0f0" opacity="0.8" />
+        <circle cx="50" cy="38" r="2" fill="#f0f0f0" opacity="0.8" />
+        <g id="eyes"></g>
+        <g id="mouth"></g>
+      `;
+    } else if(theme === 'stormy-morning'){
+      // Cloud
+      mascotHTML = `
+        <!-- Cloud body (multiple circles) -->
+        <circle cx="35" cy="38" r="15" fill="#aeb6bf" stroke="#5d6d7e" stroke-width="2" />
+        <circle cx="50" cy="33" r="17" fill="#d5dbdb" stroke="#5d6d7e" stroke-width="2" />
+        <circle cx="65" cy="38" r="15" fill="#aeb6bf" stroke="#5d6d7e" stroke-width="2" />
+        <circle cx="50" cy="45" r="13" fill="#85929e" stroke="#5d6d7e" stroke-width="2" />
+        <!-- Rain drops (shortened) -->
+        <ellipse cx="38" cy="58" rx="2.5" ry="5" fill="#5d6d7e" opacity="0.6" />
+        <ellipse cx="50" cy="62" rx="2.5" ry="5" fill="#5d6d7e" opacity="0.6" />
+        <ellipse cx="62" cy="58" rx="2.5" ry="5" fill="#5d6d7e" opacity="0.6" />
+        <!-- Lightning (optional accent) -->
+        <path d="M 54,50 L 52,54 L 53,54 L 51,58" stroke="#f39c12" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8" />
+        <g id="eyes"></g>
+        <g id="mouth"></g>
+      `;
+    } else {
+      // Default (current smiley)
+      mascotHTML = `
+        <circle cx="50" cy="34" r="30" fill="#ffd166" stroke="#f59e0b" stroke-width="2" />
+        <g id="eyes"></g>
+        <g id="mouth"></g>
+      `;
+    }
+    
+    face.innerHTML = mascotHTML;
+  }
+  
   // Mascot reactions (change SVG mouth/eyes)
   function setMascotMood(mood='neutral'){
     try{
@@ -214,35 +332,47 @@ const Game = (() => {
       const face = document.querySelector('#face');
       const eyes = document.querySelector('#eyes');
       const mouth = document.querySelector('#mouth');
-      if(!face) return;
+      if(!face || !eyes || !mouth) return;
+      
+      // Get current theme for position adjustments
+      const theme = document.body.getAttribute('data-theme') || 'space';
+      
+      // Position adjustments per theme
+      let eyeY = 32, mouthY = 44, mouthYSad = 52;
+      if(theme === 'lavender-fields') { eyeY = 18; mouthY = 24; mouthYSad = 28; } // Butterfly (head)
+      else if(theme === 'hydrangea') { eyeY = 34; mouthY = 40; mouthYSad = 44; } // Flower (center)
+      else if(theme === 'lush-forest') { eyeY = 36; mouthY = 48; mouthYSad = 52; } // Deer (snout area)
+      else if(theme === 'stormy-morning') { eyeY = 34; mouthY = 42; mouthYSad = 46; } // Cloud
+      else { eyeY = 32; mouthY = 44; mouthYSad = 52; } // default
       
       // Remove all mood classes
       mascot.classList.remove('mood-happy', 'mood-sad', 'mood-excited');
       
       // clear
       eyes.innerHTML=''; mouth.innerHTML='';
+      
       if(mood==='happy'){
         mascot.classList.add('mood-happy');
-        eyes.innerHTML = '<circle cx="36" cy="28" r="5" fill="#111" /><circle cx="64" cy="28" r="5" fill="#111" />';
-        mouth.innerHTML = '<path d="M36,44 Q50,60 64,44" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round" />';
+        eyes.innerHTML = `<circle cx="36" cy="${eyeY}" r="5" fill="#111" /><circle cx="64" cy="${eyeY}" r="5" fill="#111" />`;
+        mouth.innerHTML = `<path d="M36,${mouthY} Q50,${mouthY+16} 64,${mouthY}" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round" />`;
       }else if(mood==='sad'){
         mascot.classList.add('mood-sad');
-        eyes.innerHTML = '<path d="M33,25 q6,8 12,0" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" /> <path d="M61,25 q6,8 12,0" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" />';
-        mouth.innerHTML = '<path d="M36,54 Q50,44 64,54" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round" />';
+        eyes.innerHTML = `<path d="M33,${eyeY-3} q6,8 12,0" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" /> <path d="M61,${eyeY-3} q6,8 12,0" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" />`;
+        mouth.innerHTML = `<path d="M36,${mouthYSad} Q50,${mouthYSad-10} 64,${mouthYSad}" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round" />`;
       }else if(mood==='surprised'){
-        eyes.innerHTML = '<circle cx="36" cy="28" r="6" fill="#111" /><circle cx="64" cy="28" r="6" fill="#111" />';
-        mouth.innerHTML = '<circle cx="50" cy="46" r="8" fill="#111" />';
+        eyes.innerHTML = `<circle cx="36" cy="${eyeY}" r="6" fill="#111" /><circle cx="64" cy="${eyeY}" r="6" fill="#111" />`;
+        mouth.innerHTML = `<circle cx="50" cy="${mouthY+2}" r="8" fill="#111" />`;
       }else if(mood==='excited'){
         mascot.classList.add('mood-excited');
-        eyes.innerHTML = '<circle cx="36" cy="28" r="5" fill="#111" /><circle cx="64" cy="28" r="5" fill="#111" /><circle cx="33" cy="26" r="2" fill="#fff" /><circle cx="61" cy="26" r="2" fill="#fff" />';
-        mouth.innerHTML = '<path d="M36,42 Q50,62 64,42" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round" />';
+        eyes.innerHTML = `<circle cx="36" cy="${eyeY}" r="5" fill="#111" /><circle cx="64" cy="${eyeY}" r="5" fill="#111" /><circle cx="33" cy="${eyeY-2}" r="2" fill="#fff" /><circle cx="61" cy="${eyeY-2}" r="2" fill="#fff" />`;
+        mouth.innerHTML = `<path d="M36,${mouthY-2} Q50,${mouthY+18} 64,${mouthY-2}" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round" />`;
       }else if(mood==='thinking'){
-        eyes.innerHTML = '<circle cx="36" cy="28" r="4" fill="#111" /><circle cx="64" cy="28" r="4" fill="#111" />';
-        mouth.innerHTML = '<path d="M36,48 Q44,52 52,48" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round" />';
+        eyes.innerHTML = `<circle cx="36" cy="${eyeY}" r="4" fill="#111" /><circle cx="64" cy="${eyeY}" r="4" fill="#111" />`;
+        mouth.innerHTML = `<path d="M36,${mouthY+4} Q44,${mouthY+8} 52,${mouthY+4}" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round" />`;
       }else{
         // neutral
-        eyes.innerHTML = '<circle cx="36" cy="28" r="4" fill="#111" /><circle cx="64" cy="28" r="4" fill="#111" />';
-        mouth.innerHTML = '<path d="M36,46 Q50,52 64,46" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round" />';
+        eyes.innerHTML = `<circle cx="36" cy="${eyeY}" r="4" fill="#111" /><circle cx="64" cy="${eyeY}" r="4" fill="#111" />`;
+        mouth.innerHTML = `<path d="M36,${mouthY+2} Q50,${mouthY+8} 64,${mouthY+2}" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round" />`;
       }
     }catch(e){}
   }
@@ -826,8 +956,12 @@ const Game = (() => {
     // Theme picker
     document.querySelectorAll('.theme').forEach(t => {
       t.addEventListener('click', () => {
-        document.body.setAttribute('data-theme', t.dataset.theme);
+        const themeName = t.dataset.theme;
+        document.body.setAttribute('data-theme', themeName);
         setActiveOption('.theme', t);
+        // Change mascot based on theme
+        createMascotForTheme(themeName);
+        setMascotMood('neutral');
       });
     });
 
@@ -882,12 +1016,15 @@ const Game = (() => {
     load();
     setupUI();
     updateUI();
-    setMascotMood('neutral');
     
     // Set active theme based on current body data-theme
-    const currentTheme = document.body.getAttribute('data-theme') || 'space';
+    const currentTheme = document.body.getAttribute('data-theme') || 'lavender-fields';
     const activeThemeBtn = document.querySelector(`.theme[data-theme="${currentTheme}"]`);
     if(activeThemeBtn) activeThemeBtn.classList.add('active');
+    
+    // Create mascot for current theme and set mood
+    createMascotForTheme(currentTheme);
+    setMascotMood('neutral');
   }
 
   return { init, startGame, resetGame, state };
